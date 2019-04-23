@@ -4,7 +4,9 @@
   "description": "Code repository for the Split Croatia workshop",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm i && tail -f /dev/null",
+    "ganache:cleanAndDeploy": "rm -rf build/ && truffle migrate --reset --network development",
+    "ganache:test": "truffle test --network development"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,8 @@
   },
   "homepage": "https://github.com/aave/split-croatia-workshop#readme",
   "dependencies": {
-    "openzeppelin-solidity": "^2.2.0"
+    "openzeppelin-solidity": "^2.2.0",
+    "truffle-hdwallet-provider": "1.0.6",
+    "web3": "1.0.0-beta.52"
   }
 }
