@@ -1,0 +1,22 @@
+{
+  "name": "split-croatia-workshop",
+  "version": "1.0.0",
+  "description": "Code repository for the Split Croatia workshop",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aave/split-croatia-workshop.git"
+  },
+  "author": "Emilio Frangella",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aave/split-croatia-workshop/issues"
+  },
+  "homepage": "https://github.com/aave/split-croatia-workshop#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "^2.2.0"
+  }
+}
