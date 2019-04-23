@@ -1,0 +1,25 @@
+version: "3.5"
+
+services:
+  smart-contracts:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./:/app/
+    working_dir: /app
+    restart: always
+    command: npm run dev # installing node modules and keep container running
+    environment:
+      MOCK_DAI_ADDRESS_KOVAN: ""
+      MOCK_LEND_ADDRESS_KOVAN: ""
+      MNEMONIC_KOVAN: ""
+      PRIVATE_KEY_KOVAN: ""
+      DEPLOYMENT_ADDRESS_KOVAN: ""
+      INFURA_URL_KOVAN: "https://kovan.infura.io/v3/61fbbc90280f42ed91ab97e3c5875702"
+      LENDING_POOL_ADDRESS_KOVAN: ""
+    depends_on:
+      - ganache
+
+  ganache:
+    image: trufflesuite/ganache-cli
