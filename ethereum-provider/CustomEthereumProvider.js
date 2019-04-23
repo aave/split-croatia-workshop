@@ -9,14 +9,8 @@ const Web3 = require("web3");
  * A simple HttpProvider should be used to send rpc calls over http
  */
 export default class CustomEthereumProvider {
-    private host: string;
-    private timeout: number;
-    private connected: boolean;
-    private headers: any;
-    private callerAddress: string;
-    private privateKey: string;
 
-    constructor(callerAddress: string, privateKey: string, host: string, timeout?: number, headers?: any) {
+    constructor(callerAddress, privateKey, host, timeout, headers) {
         this.host = host || 'http://localhost:8545';
         this.timeout = timeout || 0;
         this.connected = false;
@@ -32,7 +26,7 @@ export default class CustomEthereumProvider {
         request.setRequestHeader('Content-Type', 'application/json');
 
         if (this.headers) {
-            this.headers.forEach(function (header: any) {
+            this.headers.forEach(function (header) {
                 request.setRequestHeader(header.name, header.value);
             });
         }
@@ -47,7 +41,7 @@ export default class CustomEthereumProvider {
  * @param {Object} payload
  * @param {Function} callback triggered on end with (err, result)
  */
-    send(payload: any, callback: any) {
+    send(payload, callback) {
         let _this = this;
         let request = this._prepareRequest();
 
@@ -94,7 +88,7 @@ export default class CustomEthereumProvider {
 
                     const web3 = new Web3(new Web3.providers.HttpProvider(this.host));
 
-                    web3.eth.getTransactionCount(payload.params[0].from).then((nonce:any) => {
+                    web3.eth.getTransactionCount(payload.params[0].from).then((nonce) => {
 
                         let rawTx = {
                             gasLimit: payload.params[0].gas,
