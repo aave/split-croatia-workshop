@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Container, Row, Col, ListGroup } from 'react-bootstrap';
 
 function simulateNetworkRequest() {
@@ -36,22 +37,22 @@ export default class Pool extends React.Component {
             </Row>
             <ListGroup>
 				<ListGroup.Item>
-					<a href='#Asset/DAI'>
+                    <Link to="/Asset/DAI">
 						<Row>
                 			<Col>DAI</Col>
 							<Col>5.54%</Col>
 							<Col>321</Col>
 						</Row>
-					</a>
+					</Link>
             	</ListGroup.Item>
             	<ListGroup.Item>
-					<a href='#Assets/ETH'>
+					<Link to="/Asset/ETH"> 
 						<Row>
                 			<Col>Ether</Col>
 							<Col>1.43%</Col>
 							<Col>54</Col>
 						</Row>
-					</a>
+					</Link>
 				</ListGroup.Item>
             </ListGroup>
         </Container>

@@ -1,45 +1,51 @@
 import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-
-function simulateNetworkRequest() {
-  return new Promise(resolve => setTimeout(resolve, 2000));
-}
+import { Container, Row, Col, Image, ButtonToolbar, Button } from 'react-bootstrap';
+import HomeButton from './homeButton';
+import SupplyForm from './supplyForm';
+import WithdrawForm from './withdrawForm';
 
 export default class Asset extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.handleClick = this.handleClick.bind(this);
+    this.toolbarClick = this.toolbarClick.bind(this);
 
     this.state = {
-      isLoading: false,
+      isSupply: true,
     };
   }
 
-  handleClick() {
-    this.setState({ isLoading: true }, () => {
-      simulateNetworkRequest().then(() => {
-        this.setState({ isLoading: false });
-      });
-    });
-  }
+    toolbarClick() {
+        this.setState({ isSupply: !this.state.isSupply })
+    }
 
   render() {
-    //const { isLoading } = this.state;
+    const { params } = this.props.match
+    const { isSupply } = this.state;  
 
     return (
         <Container>
             <Row>
-                
+                <HomeButton />               
             </Row>
             <Row>
-                <Col>Available Liquidity: 700</Col>
-            </Row>
-            <Row>
-                <Col>Total Borrows: 300</Col>
-            </Row>
-            <Row>
-                <Col> Interest Rate: 4</Col>
+                <Col>
+                    <Row><Image src="../public/asset_DAI.png" roundedCircle /> {params.simbol} </Row>
+                    <Row> Supply Balance: 29201921 </Row>
+                    <Row> Interest Rate: 4.5% </Row>
+                    <Row> Interest Earned: 31231.3231 {params.simbol} </Row>
+                </Col>
+                <Col>
+                    <Row>
+                        <ButtonToolbar>
+                            <Button variant="dark" disabled={isSupply} onClick={this.toolbarClick} active>Supply</Button>
+                            <Button variant="dark" disabled={!isSupply} onClick={this.toolbarClick} active>Withdraw</Button>
+                        </ButtonToolbar>
+                    </Row>
+                    <Row>
+                        {isSupply? <SupplyForm /> : <WithdrawForm />}
+                    </Row>
+                </Col>
             </Row>
         </Container>
     );
