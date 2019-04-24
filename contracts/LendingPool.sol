@@ -33,7 +33,7 @@ contract LendingPool is Ownable {
         uint borrowAccruedInterestUntilLastUpdate;
         uint lastUpdated;
 
-        
+
     }
 
     /***********************
@@ -168,12 +168,13 @@ contract LendingPool is Ownable {
        
     }
 
-    function addMarket(address _market) public onlyOwner {
+    function addMarket(address _market, uint _interestRate) public {
         
         MarketData storage data = marketsData[_market];
 
         require(!data.active, "Market is already added");
 
+        data.interestRate = _interestRate;
         data.active = true;
 
         markets.push(_market);
