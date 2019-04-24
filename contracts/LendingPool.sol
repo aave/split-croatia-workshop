@@ -30,15 +30,17 @@ contract LendingPool is Ownable {
 
         uint borrowedBalance;
         uint liquidityBalance;
-        uint accruedInterestUntilLastUpdate;
+        uint borrowAccruedInterestUntilLastUpdate;
         uint lastUpdated;
+
+        
     }
 
     /***********************
     @title MarketBalance structure
     @author Aave
     @notice the structure stores the information related to the markets of the pool.
-
+    @dev the interestRate is expressed in percentage (so if 5, it means 5% or 5/100 for calculations)
     ************************/
 
     struct MarketData {
@@ -65,10 +67,21 @@ contract LendingPool is Ownable {
         priceOracle = _priceOracle;
     }
 
+    /***********************
+    @author Aave
+    @notice The approve function allows the protocol to witghdraw ERC20 from the user wallet
+    ************************/
+
     function approve(address _market) public {
 
         require(ERC20(_market).approve(address(this), ERC20_APPROVAL_AMOUNT), "Approval of the contract failed");
     }
+
+
+    /***********************
+    @author Aave
+    @notice The approve function allows the protocol to witghdraw ERC20 from the user wallet
+    ************************/
 
     function deposit(address _market, uint _amount) public {
         
@@ -79,6 +92,7 @@ contract LendingPool is Ownable {
         marketData.totalLiquidity.add(_amount);
         marketData.availableLiquidity.add(marketData.totalBorrows);
 
+        //calculation for the accrued interest is pourposely left out here - interest rate needs to be
         UserData storage userData = usersData[msg.sender][_market];
 
         userData.liquidityBalance.add(_amount);
@@ -122,7 +136,7 @@ contract LendingPool is Ownable {
         );
         
         //everything is fine, so updating the status
-        userData.accruedInterestUntilLastUpdate = calculateAccruedInterest(_market, msg.sender);  
+        userData.borrowAccruedInterestUntilLastUpdate = calculateAccruedInterest(_market, msg.sender);  
 
         userData.borrowedBalance = userData.borrowedBalance.add(_amount);   
         
@@ -143,11 +157,11 @@ contract LendingPool is Ownable {
         uint amountToRepay = userData.borrowedBalance.add(accruedInterest);
 
         userData.borrowedBalance = 0;
-        userData.accruedInterestUntilLastUpdate = 0;
+        userData.borrowAccruedInterestUntilLastUpdate = 0;
         userData.lastUpdated = 0;
 
         transferERC20(_market, msg.sender, address(this), amountToRepay);
-        
+
     }       
 
     function liquidateBorrow(address _market, address _user) public {
@@ -210,7 +224,7 @@ contract LendingPool is Ownable {
 
         uint yearlyInterestInCurrency = userData.borrowedBalance.mul(marketData.interestRate).div(100);
 
-        uint accruedInterest = userData.accruedInterestUntilLastUpdate.add(yearlyInterestInCurrency.mul(timePassed).div(SECONDS_PER_YEAR));
+        uint accruedInterest = userData.borrowAccruedInterestUntilLastUpdate.add(yearlyInterestInCurrency.mul(timePassed).div(SECONDS_PER_YEAR));
 
         return accruedInterest;     
         
