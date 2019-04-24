@@ -1,4 +1,4 @@
-pragma solidity ^0.5.6;
+pragma solidity ^0.5.2;
 
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
@@ -30,6 +30,8 @@ contract LendingPool is Ownable {
 
         uint borrowedBalance;
         uint liquidityBalance;
+        uint accruedInterestUntilLastUpdate;
+        uint lastUpdated;
     }
 
     /***********************
@@ -50,6 +52,7 @@ contract LendingPool is Ownable {
 
     uint constant ERC20_APPROVAL_AMOUNT = 1000000000*1 ether;
     uint constant BORROW_COLLATERAL_RATIO = 150; 
+    uint constant SECONDS_PER_YEAR = 31557600;
 
     address priceOracle;
 
@@ -117,10 +120,11 @@ contract LendingPool is Ownable {
             _amount <= maxBorrowAvailableInTokens,
             "The liquidity balance is not enough to cover for the borrow"
         );
-
         
         //everything is fine, so updating the status
-        userData.borrowedBalance = userData.borrowedBalance.add(_amount);     
+        userData.accruedInterestUntilLastUpdate = calculateAccruedInterest(_market, msg.sender);  
+
+        userData.borrowedBalance = userData.borrowedBalance.add(_amount);   
         
         marketData.availableLiquidity = marketData.availableLiquidity.sub(_amount);
 
@@ -130,9 +134,25 @@ contract LendingPool is Ownable {
 
     }
 
-    function payback(address _market, uint _amount) public {
+    function payback(address _market) public {
 
+        UserData storage userData = usersData[msg.sender][_market];
+
+        uint accruedInterest = calculateAccruedInterest(_market, msg.sender);
+
+        uint amountToRepay = userData.borrowedBalance.add(accruedInterest);
+
+        userData.borrowedBalance = 0;
+        userData.accruedInterestUntilLastUpdate = 0;
+        userData.lastUpdated = 0;
+
+        transferERC20(_market, msg.sender, address(this), amountToRepay);
+        
     }       
+
+    function liquidateBorrow(address _market, address _user) public {
+       
+    }
 
     function addMarket(address _market) public onlyOwner {
         
@@ -166,15 +186,34 @@ contract LendingPool is Ownable {
 
     function calculateTotalUserBalancesUSD(address _userAddress) public view returns (uint _totalLiquidityBalance, uint _totalBorrowBalance) {
 
-
         for(uint i = 0; i < markets.length; i++){
 
             UserData storage data = usersData[_userAddress][markets[i]];
-            
+
+            /* earned interest is pourposely lef out from the calculations here - exercise for the students */            
             _totalLiquidityBalance = _totalLiquidityBalance.add(priceOracle.getPrice(markets[i], data.liquidityBalance));
 
             _totalBorrowBalance = _totalBorrowBalance.add(priceOracle.getPrice(markets[i], data.borrowedBalance));
+
+            _totalBorrowBalance = _totalBorrowBalance.add(calculateAccruedInterest(markets[i], _userAddress));
         }        
+    }
+
+
+    function calculateAccruedInterest(address _market, address _userAddress) public view returns(uint) {
+        
+        UserData storage userData = usersData[_userAddress][_market];
+        MarketData storage marketData = marketsData[_market];
+
+        //using timestamp for simplicity - a more strict implementation would need to use block.timestamp
+        uint timePassed = block.timestamp - userData.lastUpdated;
+
+        uint yearlyInterestInCurrency = userData.borrowedBalance.mul(marketData.interestRate).div(100);
+
+        uint accruedInterest = userData.accruedInterestUntilLastUpdate.add(yearlyInterestInCurrency.mul(timePassed).div(SECONDS_PER_YEAR));
+
+        return accruedInterest;     
+        
     }
 
     function transferERC20(address _token, address _from, address _to, uint _amount) internal {
