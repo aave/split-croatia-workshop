@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import App from './App';
 import Asset from './components/asset';
+import Market from './components/market';
 import NotFound from './components/notFound';
 import * as serviceWorker from './serviceWorker';
 
@@ -13,6 +14,7 @@ const routing = (
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/asset/:simbol" component={Asset} />
+	<Route path="/markets" component={Market} />
 	<Route component={NotFound} />
       </Switch>
     </div>

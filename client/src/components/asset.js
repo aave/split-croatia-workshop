@@ -1,8 +1,11 @@
 import React from 'react';
 import { Container, Row, Col, Image, ButtonToolbar, Button } from 'react-bootstrap';
+import NavBar from './navBar';
 import HomeButton from './homeButton';
 import SupplyForm from './supplyForm';
 import WithdrawForm from './withdrawForm';
+import DaiImg from '../images/asset_DAI.png';
+import EthImg from '../images/asset_ETH.png';
 
 export default class Asset extends React.Component {
   constructor(props, context) {
@@ -25,12 +28,15 @@ export default class Asset extends React.Component {
 
     return (
         <Container>
+	        <Row>
+		        <NavBar />
+	        </Row>
             <Row>
                 <HomeButton />               
             </Row>
             <Row>
                 <Col>
-                    <Row><Image src="../public/asset_DAI.png" roundedCircle /> {params.simbol} </Row>
+                    <Row><Image src={params.simbol === "DAI"? DaiImg : EthImg} alt={params.simbol} width="25" height="25" roundedCircle /> {params.simbol} </Row>
                     <Row> Supply Balance: 29201921 </Row>
                     <Row> Interest Rate: 4.5% </Row>
                     <Row> Interest Earned: 31231.3231 {params.simbol} </Row>
