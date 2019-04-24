@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, ListGroup, Image } from 'react-bootstrap';
+import DaiImg from '../images/asset_DAI.png';
+import EthImg from '../images/asset_ETH.png';
 
 export default class Pool extends React.Component {
 
@@ -17,7 +19,7 @@ export default class Pool extends React.Component {
 				<ListGroup.Item>
                     <Link to="/Asset/DAI">
 						<Row>
-                			<Col>DAI</Col>
+                			<Col><Image src={DaiImg} width="25" height="25" roundedCircle />DAI</Col>
 							<Col>5.54%</Col>
 							<Col>321</Col>
 						</Row>
@@ -26,7 +28,7 @@ export default class Pool extends React.Component {
             	<ListGroup.Item>
 					<Link to="/Asset/ETH"> 
 						<Row>
-                			<Col>Ether</Col>
+                			<Col><Image src={EthImg} width="25" height="25" roundedCircle />Ether</Col>
 							<Col>1.43%</Col>
 							<Col>54</Col>
 						</Row>

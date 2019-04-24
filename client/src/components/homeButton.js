@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 import { withRouter } from 'react-router-dom';
+import provider from '../utils/provider';
 
 class HomeButton extends React.Component {
   constructor(props, context) {
@@ -8,6 +9,10 @@ class HomeButton extends React.Component {
 
     this.handleClick = this.handleClick.bind(this);
 
+  }
+
+  componentDidMount() {
+    provider.metamask()
   }
 
   handleClick() {
