@@ -19,6 +19,9 @@ contract LendingPool is Ownable {
     using PriceOracleLibrary for address;
 
 
+    event Deposited(address _sender, address _market, uint _amount);
+    event BorrowAttempt(uint borrowAmountUSD, uint maxBorrowUSD);
+
     /***********************
     @title UserBalance structure
     @author Aave
@@ -53,8 +56,10 @@ contract LendingPool is Ownable {
     }
 
     uint constant ERC20_APPROVAL_AMOUNT = 1000000000*1 ether;
-    uint constant BORROW_COLLATERAL_RATIO = 150; 
-    uint constant SECONDS_PER_YEAR = 31557600;
+    uint constant BORROW_COLLATERAL_RATIO = 150;
+    //uint constant SECONDS_PER_YEAR = 31557600; //this is the correct one
+    uint constant SECONDS_PER_YEAR = 86400; //approximated one year to one day for testing pourposes
+    uint constant TOKEN_DECIMALS = 10 ** 18;
 
     address priceOracle;
 
@@ -65,16 +70,6 @@ contract LendingPool is Ownable {
 
     constructor(address _priceOracle) public {
         priceOracle = _priceOracle;
-    }
-
-    /***********************
-    @author Aave
-    @notice The approve function allows the protocol to witghdraw ERC20 from the user wallet
-    ************************/
-
-    function approve(address _market) public {
-
-        require(ERC20(_market).approve(address(this), ERC20_APPROVAL_AMOUNT), "Approval of the contract failed");
     }
 
 
@@ -89,15 +84,18 @@ contract LendingPool is Ownable {
 
         require(marketData.active, "Market is not active");
 
-        marketData.totalLiquidity.add(_amount);
-        marketData.availableLiquidity.add(marketData.totalBorrows);
+        marketData.totalLiquidity = marketData.totalLiquidity.add(_amount);
+        marketData.availableLiquidity = marketData.availableLiquidity.add(_amount);
 
         //calculation for the accrued interest is pourposely left out here - interest rate needs to be
         UserData storage userData = usersData[msg.sender][_market];
 
-        userData.liquidityBalance.add(_amount);
+        userData.liquidityBalance = userData.liquidityBalance.add(_amount);
 
-        transferERC20(_market, msg.sender, address(this), _amount);              
+
+        transferERC20(_market, msg.sender, address(this), _amount);
+
+        emit Deposited(msg.sender, _market, _amount);
     }
 
     function withdraw(address _market, uint _amount) public {
@@ -109,52 +107,55 @@ contract LendingPool is Ownable {
         UserData storage userData = usersData[msg.sender][_market];
         MarketData storage marketData = marketsData[_market];
 
-        uint amountToBorrowUSD = priceOracle.getPrice(_market, _amount);
+        uint amountToBorrowUSD = priceOracle.getPrice(_market, _amount).div(TOKEN_DECIMALS);
 
-        (uint currentBorrowBalanceUSD,
-        uint currentLiquidityBalanceUSD) = calculateTotalUserBalancesUSD(msg.sender);
+        (uint currentLiquidityBalanceUSD,
+        uint currentBorrowBalanceUSD) = calculateTotalUserBalancesUSD(msg.sender);
 
         uint maxBorrowAvailableUSD = currentLiquidityBalanceUSD.mul(100).div(BORROW_COLLATERAL_RATIO);
 
+        emit BorrowAttempt(amountToBorrowUSD, maxBorrowAvailableUSD);
+
         require(
             maxBorrowAvailableUSD >= currentBorrowBalanceUSD.add(amountToBorrowUSD),
-            "You can borrow a maximum of 67% in value of the available collateral"
+            "You can borrow a maximum of 67% in value of the available collateral."
             );
-        
-        uint marketTokenUnitPrice = priceOracle.getPrice(_market, 1);
-        uint maxBorrowAvailableInTokens = maxBorrowAvailableUSD.div(marketTokenUnitPrice);
 
-     
+        uint marketTokenUnitPrice = priceOracle.getPrice(_market, 1);
+        uint maxBorrowAvailableInTokens = maxBorrowAvailableUSD.div(marketTokenUnitPrice).mul(TOKEN_DECIMALS);
+
         require(
             marketData.availableLiquidity > maxBorrowAvailableInTokens,
             "The liquidity available is not enough for this borrow"
         );
 
-        require(
-            _amount <= maxBorrowAvailableInTokens,
-            "The liquidity balance is not enough to cover for the borrow"
-        );
-        
         //everything is fine, so updating the status
-        userData.borrowAccruedInterestUntilLastUpdate = calculateAccruedInterest(_market, msg.sender);  
+        userData.borrowAccruedInterestUntilLastUpdate = calculateAccruedInterest(_market, msg.sender);
 
-        userData.borrowedBalance = userData.borrowedBalance.add(_amount);   
-        
+        userData.lastUpdated = block.timestamp;
+
+        userData.borrowedBalance = userData.borrowedBalance.add(_amount);
+
         marketData.availableLiquidity = marketData.availableLiquidity.sub(_amount);
 
         marketData.totalBorrows = marketData.totalBorrows.add(_amount);
 
-        transferERC20(_market, address(this), msg.sender, _amount);
+        ERC20(_market).transfer(msg.sender, _amount);
 
     }
 
     function payback(address _market) public {
 
         UserData storage userData = usersData[msg.sender][_market];
+        MarketData storage marketData = marketsData[_market];
 
         uint accruedInterest = calculateAccruedInterest(_market, msg.sender);
 
         uint amountToRepay = userData.borrowedBalance.add(accruedInterest);
+
+        marketData.totalLiquidity = marketData.totalLiquidity.add(accruedInterest);
+        marketData.availableLiquidity = marketData.availableLiquidity.add(amountToRepay);
+        marketData.totalBorrows = marketData.totalBorrows.sub(userData.borrowedBalance);
 
         userData.borrowedBalance = 0;
         userData.borrowAccruedInterestUntilLastUpdate = 0;
@@ -162,14 +163,13 @@ contract LendingPool is Ownable {
 
         transferERC20(_market, msg.sender, address(this), amountToRepay);
 
-    }       
+    }
 
     function liquidateBorrow(address _market, address _user) public {
-       
     }
 
     function addMarket(address _market, uint _interestRate) public {
-        
+
         MarketData storage data = marketsData[_market];
 
         require(!data.active, "Market is already added");
@@ -179,39 +179,47 @@ contract LendingPool is Ownable {
 
         markets.push(_market);
 
-    } 
+    }
 
 
-    function getMarketData(address _market) public view returns(uint _totalLiquidity, uint _interestRate, bool _active) {
+    function getMarketData(address _market) public view returns(uint totalLiquidity, uint availableLiquidity, uint interestRate, bool active) {
 
         MarketData storage data = marketsData[_market];
-        _totalLiquidity = data.totalLiquidity;
-        _interestRate = data.interestRate;
-        _active = data.active;
+        totalLiquidity = data.totalLiquidity;
+        availableLiquidity = data.availableLiquidity;
+        interestRate = data.interestRate;
+        active = data.active;
     }
 
-    function getUserData(address _market) public view returns(uint _borrowedBalance, uint _liquidityBalance) {
-       
+    function getUserData(address _market) public view returns(uint borrowedBalance, uint liquidityBalance) {
+
         UserData storage data = usersData[msg.sender][_market];
-        _borrowedBalance = data.borrowedBalance;
-        _liquidityBalance = data.liquidityBalance;
+        borrowedBalance = data.borrowedBalance;
+        liquidityBalance = data.liquidityBalance;
 
     }
 
 
-    function calculateTotalUserBalancesUSD(address _userAddress) public view returns (uint _totalLiquidityBalance, uint _totalBorrowBalance) {
+    function calculateTotalUserBalancesUSD(address _userAddress) public view returns (uint totalLiquidityBalance, uint totalBorrowBalance) {
 
         for(uint i = 0; i < markets.length; i++){
 
             UserData storage data = usersData[_userAddress][markets[i]];
 
-            /* earned interest is pourposely lef out from the calculations here - exercise for the students */            
-            _totalLiquidityBalance = _totalLiquidityBalance.add(priceOracle.getPrice(markets[i], data.liquidityBalance));
+            /* earned interest is pourposely lef out from the calculations here - exercise for the students */
+            totalLiquidityBalance = totalLiquidityBalance.add(priceOracle.getPrice(markets[i], data.liquidityBalance)).div(TOKEN_DECIMALS);
 
-            _totalBorrowBalance = _totalBorrowBalance.add(priceOracle.getPrice(markets[i], data.borrowedBalance));
+            totalBorrowBalance = totalBorrowBalance.add(priceOracle.getPrice(markets[i], data.borrowedBalance)).div(TOKEN_DECIMALS);
 
-            _totalBorrowBalance = _totalBorrowBalance.add(calculateAccruedInterest(markets[i], _userAddress));
-        }        
+            totalBorrowBalance = totalBorrowBalance.add(
+                priceOracle.getPrice(
+                    markets[i],calculateAccruedInterest(
+                        markets[i],
+                        _userAddress
+                    )
+                )
+            ).div(TOKEN_DECIMALS);
+        }
     }
 
 
@@ -227,8 +235,7 @@ contract LendingPool is Ownable {
 
         uint accruedInterest = userData.borrowAccruedInterestUntilLastUpdate.add(yearlyInterestInCurrency.mul(timePassed).div(SECONDS_PER_YEAR));
 
-        return accruedInterest;     
-        
+        return accruedInterest;
     }
 
     function transferERC20(address _token, address _from, address _to, uint _amount) internal {
@@ -238,7 +245,7 @@ contract LendingPool is Ownable {
                 _from, 
                 _to, 
                 _amount),
-            "Approval of the contract failed"
+            "Transfer of the ERC20 failed"
             );
     }
     

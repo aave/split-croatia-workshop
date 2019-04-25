@@ -20,5 +20,4 @@ module.exports = async function(deployer) {
   
   await lendingPoolInstance.addMarket(mockLENDInstance.address, 5);
 
-  await deployer.deploy(LendingPool, mockOracleInstance.address);
 };

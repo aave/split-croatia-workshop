@@ -12,7 +12,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           process.env.MNEMONIC_KOVAN || process.env.PRIVATE_KEY_KOVAN,
-          INFURA_URL_KOVAN
+          process.env.INFURA_URL_KOVAN
         ),
       from: process.env.DEPLOYMENT_ADDRESS_KOVAN,
       network_id: "42",
