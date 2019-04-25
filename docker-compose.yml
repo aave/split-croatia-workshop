@@ -11,9 +11,9 @@ services:
     restart: always
     command: npm run dev # installing node modules and keep container running
     environment:
-      MOCK_DAI_ADDRESS_KOVAN: ""
-      MOCK_LEND_ADDRESS_KOVAN: ""
-      MNEMONIC_KOVAN: ""
+      MOCK_DAI_ADDRESS_KOVAN: "0x1bdfd9358e7edc343f21029d583c994f6cab46bf"
+      MOCK_LEND_ADDRESS_KOVAN: "0x987c3e032Db7A89b0D489420Abe98151e6FaD714"
+      MNEMONIC_KOVAN: "explain include hawk neck police achieve neck first earn coach echo curtain"
       PRIVATE_KEY_KOVAN: ""
       DEPLOYMENT_ADDRESS_KOVAN: ""
       INFURA_URL_KOVAN: "https://kovan.infura.io/v3/61fbbc90280f42ed91ab97e3c5875702"
