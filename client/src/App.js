@@ -5,7 +5,7 @@ import NavBar from './components/navBar';
 import Pool from './components/pool';
 import UserInfo from './components/userInfo';
 
-export default class App extends React.Component {
+export default class App extends React.Component {    
 
     render() {
         return (
@@ -23,3 +23,5 @@ export default class App extends React.Component {
         )   
     }
 }
+
+

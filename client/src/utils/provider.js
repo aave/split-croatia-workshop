@@ -9,9 +9,11 @@ export default function metamask() {
 					// Request account access if needed
 		    			await window.ethereum.enable();
 					window.web3 = new Web3(window.ethereum);
+					console.log('metamask setting up');
 				}
 				else {
 					window.web3 = new Web3(window.ethereum);
+					console.log('metamask already setting up');
 				}         
 			} catch (error) {
 				console.log('User denied account access...');
@@ -20,10 +22,11 @@ export default function metamask() {
 	    	// Legacy dapp browsers...
 	    	else if (window.web3) {
 			window.web3 = new Web3(Web3.givenProvider);
+			console.log('metamask already setting up');
 	    	}
 	    	// Non-dapp browsers...
 	    	else {
-	       	 console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+			console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
 	    	}
 	})
 }

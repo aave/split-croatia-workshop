@@ -14,6 +14,8 @@ export default class Asset extends React.Component {
     this.toolbarClick = this.toolbarClick.bind(this);
 
     this.state = {
+      network: 0,
+      address: "",
       isSupply: true,
     };
   }

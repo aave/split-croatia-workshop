@@ -1,29 +1,46 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
 import { Container, Navbar, Nav, Alert } from 'react-bootstrap';
 import AaveImg from '../images/AAVE.png';
-import metamask from '../utils/provider';
-import { providers } from 'ethers';
 
-class NavBar extends React.Component {
+export default class NavBar extends React.Component {
     constructor(props, context) {
         super(props, context);
+	this.updateMetamaskInfo = this.updateMetamaskInfo.bind(this);
 
         this.state = {
-            network: false,
+            network: 0,
+            address: "",
         };
+
+	if (typeof window.web3.currentProvider.publicConfigStore !== 'undefined') {
+            window.web3.currentProvider.publicConfigStore.on(
+                'update', updated => this.setState(
+                    { 
+                        address: updated.selectedAddress,
+                        network: Number(updated.networkVersion)
+                    })
+            );
+        }
     }
-    componentWillMount() {
-        metamask();
-        let provider = new providers.Web3Provider(window.web3.currentProvider);
-        provider.getNetwork().then(currentNetwork => this.setState({ network: currentNetwork.name !== "kovan" ? true : false }) );
+
+    updateMetamaskInfo() {
+	    this.setState({ 
+		    address: window.ethereum.selectedAddress,
+		    network: Number(window.ethereum.networkVersion), 
+	    })
+    }
+
+    componentDidMount() {
+	    this.updateMetamaskInfo();	
     }
 
     render() {
-
+	    const address = this.state.address;
+	    const changeNetwork = this.state.network !== (42 || 0) ? true : false;
+        
         return (
             <Container>
-                { this.state.network ? <Alert variant="dark">Aave Lending Pool is currently only available on Kovan Testnet</Alert> : null }  
+                { changeNetwork ? <Alert variant="dark">Aave Lending Pool is currently only available on Kovan Testnet</Alert> : null }  
                 <Navbar bg="dark" variant="dark">
                     <Navbar.Brand href="https://aave.com/">
 		    	        <img
@@ -34,14 +51,16 @@ class NavBar extends React.Component {
         		            className="d-inline-block align-top"
       		            />
 			        </Navbar.Brand>
-			        <Nav variant="tabs" className="justify-content-end">
+			        <Nav variant="tabs" className="justify-content-center">
      			        <Nav.Link href="/" >APP </Nav.Link>
       			        <Nav.Link href="/markets" >MARKETS</Nav.Link>
     		        </Nav>
+                    <Nav className="justify-content-end">
+                        <Nav.Item style={{color:'#6c757d', padding: 10}}> USD </Nav.Item>
+                        <Nav.Item style={{color:'#6c757d', padding: 10}}> {address} </Nav.Item>
+                    </Nav>
                 </Navbar>
             </Container>
         );
     }
 }
-
-export default withRouter(NavBar)

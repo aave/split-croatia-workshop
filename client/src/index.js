@@ -7,6 +7,9 @@ import Asset from './components/asset';
 import Market from './components/market';
 import NotFound from './components/notFound';
 import * as serviceWorker from './serviceWorker';
+import metamask from './utils/provider';
+
+metamask();
 
 const routing = (
   <Router>
