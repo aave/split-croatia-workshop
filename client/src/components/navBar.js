@@ -1,6 +1,6 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
-import { Container, Navbar, Nav } from "react-bootstrap";
+import { Container, Navbar } from "react-bootstrap";
 import AaveImg from "../images/AAVE.png";
 
 class NavBar extends React.Component {
@@ -8,7 +8,7 @@ class NavBar extends React.Component {
     return (
       <Container>
         <Navbar bg="dark" variant="dark">
-          <Navbar.Brand href="https://aave.com/">
+          <Navbar.Brand href="/">
             <img
               alt="AAVE"
               src={AaveImg}
@@ -17,10 +17,10 @@ class NavBar extends React.Component {
               className="d-inline-block align-top"
             />
           </Navbar.Brand>
-          <Nav variant="tabs">
-            <Nav.Link href="/">APP </Nav.Link>
-            <Nav.Link href="/markets">MARKETS</Nav.Link>
-          </Nav>
+          {/* <Nav variant="tabs">
+            <Nav.Link href="/">Dashboard </Nav.Link>
+            <Nav.Link href="/markets">Markets</Nav.Link>
+          </Nav> */}
         </Navbar>
       </Container>
     );

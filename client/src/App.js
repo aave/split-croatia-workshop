@@ -3,7 +3,6 @@ import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import "./App.css";
 import { Container, Row } from "react-bootstrap";
 import NavBar from "./components/navBar";
-import Pool from "./components/pool";
 import UserInfo from "./components/userInfo";
 import Market from "./components/market";
 import provider from "./utils/provider";
@@ -27,27 +26,22 @@ export default class App extends React.Component {
     const { loading } = this.state;
 
     return (
-      <Container fluid>
-        <Row>
-          <NavBar />
-        </Row>
-        {(loading && "LOADING") || (
-          <>
-            <Switch>
-              <Route exact path="/" component={UserInfo} />
-              <Route path="/markets" component={Market} />
-              <Route component={Notfound} />
-            </Switch>
-
-            {/* <Row>
-              <UserInfo />
-            </Row>
-            <Row>
-              <Pool />
-            </Row> */}
-          </>
-        )}
-      </Container>
+      <Router>
+        <Container fluid>
+          <Row>
+            <NavBar />
+          </Row>
+          {(loading && "LOADING") || (
+            <>
+              <Switch>
+                <Route exact path="/" component={UserInfo} />
+                <Route path="/markets" component={Market} />
+                <Route component={Notfound} />
+              </Switch>
+            </>
+          )}
+        </Container>
+      </Router>
     );
   }
 }

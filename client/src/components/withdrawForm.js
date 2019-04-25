@@ -8,7 +8,7 @@ export default class WithdrawForm extends React.Component {
 	    <Form>
 	        <Form.Group as={Row} controlId="CompundBalance">
 	            <Form.Label>
-	                Compund Balance
+	                Balance
 	            </Form.Label>
 	            <Col>
 	                <Form.Control plaintext readOnly defaultValue="43222.544" />
