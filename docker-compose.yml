@@ -18,8 +18,12 @@ services:
       DEPLOYMENT_ADDRESS_KOVAN: ""
       INFURA_URL_KOVAN: "https://kovan.infura.io/v3/61fbbc90280f42ed91ab97e3c5875702"
       LENDING_POOL_ADDRESS_KOVAN: ""
+    ports:
+      - "3000:3000"
     depends_on:
       - ganache
 
   ganache:
     image: trufflesuite/ganache-cli
+    ports:
+      - "8545:8545"

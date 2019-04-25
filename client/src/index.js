@@ -1,12 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.css';
-import App from './App';
-import Asset from './components/asset';
-import Market from './components/market';
-import NotFound from './components/notFound';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.css";
+import App from "./App";
+import Asset from "./components/asset";
+import Market from "./components/market";
+import NotFound from "./components/notFound";
+import * as serviceWorker from "./serviceWorker";
 
 const routing = (
   <Router>
@@ -14,14 +14,14 @@ const routing = (
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/asset/:simbol" component={Asset} />
-	<Route path="/markets" component={Market} />
-	<Route component={NotFound} />
+        <Route path="/markets" component={Market} />
+        <Route component={NotFound} />
       </Switch>
     </div>
   </Router>
-)
+);
 
-ReactDOM.render(routing, document.getElementById('root'));
+ReactDOM.render(routing, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

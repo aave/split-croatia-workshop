@@ -33,7 +33,7 @@ export default class DepositButton extends React.Component {
         disabled={isLoading}
         onClick={!isLoading ? this.handleClick : null}
       >
-        {isLoading ? 'Waiting Confirmation…' : 'Deposit'}
+        {isLoading ? 'Waiting Confirmation…' : 'Deposit Liquidity'}
       </Button>
     );
   }

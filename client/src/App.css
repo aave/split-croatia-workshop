@@ -31,3 +31,22 @@
     transform: rotate(360deg);
   }
 }
+
+.container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  margin-bottom: 10px !important;
+  padding: 0 !important;
+
+}
+
+.container-fluid {
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+.row {
+  margin: 0 !important;
+  padding: 0 !important;
+}

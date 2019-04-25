@@ -1,25 +1,53 @@
-import React from 'react';
-import './App.css';
-import { Container, Row } from 'react-bootstrap'
-import NavBar from './components/navBar';
-import Pool from './components/pool';
-import UserInfo from './components/userInfo';
+import React from "react";
+import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+import "./App.css";
+import { Container, Row } from "react-bootstrap";
+import NavBar from "./components/navBar";
+import Pool from "./components/pool";
+import UserInfo from "./components/userInfo";
+import Market from "./components/market";
+import provider from "./utils/provider";
+import Notfound from "./components/notFound";
 
 export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true
+    };
+  }
 
-    render() {
-        return (
-            <Container>
-		        <Row>
-		            <NavBar />
-		        </Row>
-                <Row>
-                    <UserInfo />
-                </Row>
-                <Row>
-                    <Pool />
-                </Row>
-            </Container>
-        )   
-    }
+  disableLoading = () => this.setState({ loading: false });
+
+  async componentDidMount() {
+    provider.metamask(this.disableLoading);
+  }
+
+  render() {
+    const { loading } = this.state;
+
+    return (
+      <Container fluid>
+        <Row>
+          <NavBar />
+        </Row>
+        {(loading && "LOADING") || (
+          <>
+            <Switch>
+              <Route exact path="/" component={UserInfo} />
+              <Route path="/markets" component={Market} />
+              <Route component={Notfound} />
+            </Switch>
+
+            {/* <Row>
+              <UserInfo />
+            </Row>
+            <Row>
+              <Pool />
+            </Row> */}
+          </>
+        )}
+      </Container>
+    );
+  }
 }
